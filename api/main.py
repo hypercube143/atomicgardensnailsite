@@ -259,6 +259,11 @@ def cotd_get_today():
         return jsonify({"error": "no creature of the day yet :("}), 403
     return jsonify(todays_cotd_data), 200
 
+@app.route('/api/cotd/get_page', methods=["GET"])
+def cotd_get_page():
+    pass
+
+
 
 
 ######################################################
