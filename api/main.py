@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import os
 from dotenv import load_dotenv
+import random
 
 load_dotenv()
 MASTER_AUTH = os.getenv("API_MASTER_AUTH")
@@ -74,6 +75,16 @@ def test():
 @app.route('/api/documentation', methods=["GET"])
 def documentation():
     return render_template('documentation.html')
+
+@app.route('/api/greeting', methods=["GET"])
+def documentation():
+    res = {
+        "message": random.choice([
+            "howdy!", "hello!", "greetings!",
+            "hello there", "hi"
+        ])
+    }
+    return jsonify(res), 200
 
 # COTD ###############################################
 
