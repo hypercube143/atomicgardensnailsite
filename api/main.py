@@ -77,7 +77,7 @@ def documentation():
     return render_template('documentation.html')
 
 @app.route('/api/greeting', methods=["GET"])
-def documentation():
+def greeting():
     res = {
         "message": random.choice([
             "howdy!", "hello!", "greetings!",
