@@ -12,7 +12,7 @@ MASTER_AUTH = os.getenv("API_MASTER_AUTH")
 app = Flask(__name__)
 
 PROJECT_FOLDER = os.getcwd()
-API_FOLDER = f"{PROJECT_FOLDER}/api"
+API_FOLDER = f"{PROJECT_FOLDER}"
 UPLOAD_FOLDER = f"{API_FOLDER}/static"
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -81,7 +81,7 @@ def greeting():
     res = {
         "message": random.choice([
             "howdy!", "hello!", "greetings!",
-            "hello there", "hi"
+            "hello there", "hi", "yello"
         ])
     }
     return jsonify(res), 200
