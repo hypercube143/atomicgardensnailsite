@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>API Documentation</title>
+</head>
+
+<body>
+    <h2>API Documentation</h2>
+    <h3>/cotd/ all things Creature of the Day</h3>
+    <p>
+        /cotd/upload [POST] upload a Creature of the Day<br>
+        ---- JSON<br>
+        -------- "title" [str]<br>
+        -------- "description" [str]<br>
+        -------- "date" [optional] [str] [yyyy-mm-dd] - if not specified, will default to today<br>
+    </p>
+    <p>
+        /cotd/edit [POST] edit fields for a Creature of the Day<br>
+        ---- JSON<br>
+        -------- "title" [optional] [str]<br>
+        -------- "description" [optional] [str]<br>
+        -------- "date" [optional] [str] [yyyy-mm-dd] - if not specified, will default to today<br>
+        -------- "entry_no" [optional] [int]
+        NOTE: at least one field must be specified<br>
+    </p>
+    <p>
+        /cotd/delete [DELETE] delete a Creature of the Day<br>
+        ---- JSON<br>
+        -------- "date" [optional] [str] [yyyy-mm-dd] - if not specified, will default to today<br>
+    </p>
+    <p>
+        /cotd/get [GET] get a single Creature of the Day from a date<br>
+        ---- JSON<br>
+        -------- "date" [str] [yyyy-mm-dd]<br>
+    </p>
+    <p>
+        /cotd/get_today [GET] get today's Creature of the Day<br>
+    </p>
+</body>
+
+</html>
