@@ -88,35 +88,13 @@ def test6():
     print(res.json())
 
 
-def test7():
-    # get page data from page n
-    data = [{
-        "title": "tit",
-        "description": "desc",
-        "entry_no": i + 1
-    } for i in range(1042)]
 
-    entries_per_page = 10
-
-    page_n = 107
-
-    total_pages = math.ceil(len(data) / entries_per_page)
-    page_n = page_n % total_pages
-    end = (entries_per_page * page_n) - 1
-    start = end - entries_per_page + 1
-    page_entries = data[start:(end+1)]
-
-    print(start)
-    print(end)
-    print(f"page: {page_n}/{total_pages}")
-    print(len(page_entries))
-    print(json.dumps(page_entries, indent=4))
-
-def page_data(page_n, data):
+def page_data(data, page_n=1, last_page=False):
     ENTRIES_PER_PAGE = 10
 
     total_pages = math.ceil(len(data) / ENTRIES_PER_PAGE)
-    page_n = total_pages
+    if last_page:
+        page_n = total_pages
     end = (ENTRIES_PER_PAGE * page_n)-1
     start = end - ENTRIES_PER_PAGE+1
     if end > len(data):
@@ -143,33 +121,23 @@ def test8():
         "entry_no": i + 1
     } for i in range(1042)]
 
-    entries_per_page = 10
-
-    total_pages = math.ceil(len(data) / entries_per_page)
-    page_n = total_pages
-    end = (entries_per_page * page_n)-1
-    start = end - entries_per_page+1
-    if end > len(data):
-        end = len(data)-1
-    page_entries = data[start:(end+1)]
-    page_entry_count = len(page_entries)
-
-    res = {
-        "page_entries": page_entries,
-        "page_entries_count": page_entry_count,
-        "page_number": page_n,
-        "total_pages": total_pages,
-        "entries_range": [start+1, end+1]
-    }
+    res = page_data(data, last_page=True)
 
     print(json.dumps(res, indent=4))
 
-    # print(start)
-    # print(end)
-    # print(f"page: {page_n}/{total_pages}")
-    # print(f"showing entires: {start+1}-{end+1}")
-    # print(len(page_entries))
-    # print(json.dumps(page_entries, indent=4))
+def test9():
+    # get 10th page
+
+    data = [{
+        "title": "tit",
+        "description": "desc",
+        "entry_no": i + 1
+    } for i in range(1042)]
+
+    res = page_data(data, page_n=10)
+
+    print(json.dumps(res, indent=4))
+
 
 if __name__ == "__main__":
     # test1()
@@ -180,3 +148,4 @@ if __name__ == "__main__":
     # test6()
     # test7()
     test8()
+    test9()

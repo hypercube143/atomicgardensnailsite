@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 import random
 from filelock import FileLock
+import math
 
 load_dotenv()
 MASTER_AUTH = os.getenv("API_MASTER_AUTH")
@@ -18,6 +19,8 @@ UPLOAD_FOLDER = f"{API_FOLDER}/static"
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# UTIL ###############################################
+
 def read_json(filename, filelock):
     with filelock:
         with open(filename, "r") as f:
@@ -28,6 +31,32 @@ def write_json(filename, data, filelock):
     with filelock:
         with open(filename, "w") as f:
             f.write(json.dumps(data, indent=4))
+
+def page_data(data, page_n=1, last_page=False):
+    ENTRIES_PER_PAGE = 1
+
+    total_pages = math.ceil(len(data) / ENTRIES_PER_PAGE)
+    page_n = ((page_n-1) % total_pages) + 1
+    if last_page:
+        page_n = total_pages
+    end = (ENTRIES_PER_PAGE * page_n)-1
+    start = end - ENTRIES_PER_PAGE+1
+    if end > len(data):
+        end = len(data)-1
+    if total_pages == 1:
+        start = 0
+    page_entries = data[start:(end+1)]
+    page_entry_count = len(page_entries)
+
+    res = {
+        "page_entries": page_entries,
+        "page_entries_count": page_entry_count,
+        "page_number": page_n,
+        "total_pages": total_pages,
+        "entries_range": [start+1, end+1]
+    }
+
+    return res
 
 with app.app_context():
     errors = {
@@ -64,6 +93,7 @@ def determine_auth():
 def key_exists(js, key):
     return key in js.keys()
 
+# UTIL END ###############################################
 
 ######################################################
 #############           ROUTES           #############
@@ -264,10 +294,20 @@ def cotd_get_today():
         return jsonify({"error": "no creature of the day yet :("}), 403
     return jsonify(todays_cotd_data), 200
 
-@app.route('/api/cotd/get_page', methods=["GET"])
-def cotd_get_page():
-    pass
-
+@app.route('/api/cotd/page/<int:page_n>', methods=["GET"])
+def cotd_get_page(page_n):
+    cotd_data = read_json(COTD_FILE, cotd_file_lock)
+    cotd_list_data = [
+        {
+            "date": k,
+            "title": v["title"],
+            "description": v["description"],
+            "entry_no": v["entry_no"],
+            "media": v["media"]
+        } for k, v in cotd_data.items() 
+    ]
+    p_data = page_data(cotd_list_data, page_n=page_n)
+    return jsonify(p_data), 200
 
 
 
