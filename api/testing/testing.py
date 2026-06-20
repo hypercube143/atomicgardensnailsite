@@ -111,6 +111,28 @@ def test7():
     print(f"page: {page_n}/{total_pages}")
     print(len(page_entries))
     print(json.dumps(page_entries, indent=4))
+
+def page_data(page_n, data):
+    ENTRIES_PER_PAGE = 10
+
+    total_pages = math.ceil(len(data) / ENTRIES_PER_PAGE)
+    page_n = total_pages
+    end = (ENTRIES_PER_PAGE * page_n)-1
+    start = end - ENTRIES_PER_PAGE+1
+    if end > len(data):
+        end = len(data)-1
+    page_entries = data[start:(end+1)]
+    page_entry_count = len(page_entries)
+
+    res = {
+        "page_entries": page_entries,
+        "page_entries_count": page_entry_count,
+        "page_number": page_n,
+        "total_pages": total_pages,
+        "entries_range": [start+1, end+1]
+    }
+
+    return res
     
 def test8():
     # get last page

@@ -5,6 +5,7 @@ import json
 import os
 from dotenv import load_dotenv
 import random
+from filelock import FileLock
 
 load_dotenv()
 MASTER_AUTH = os.getenv("API_MASTER_AUTH")
@@ -17,7 +18,16 @@ UPLOAD_FOLDER = f"{API_FOLDER}/static"
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+def read_json(filename, filelock):
+    with filelock:
+        with open(filename, "r") as f:
+            data = json.loads(f.read())
+        return data
 
+def write_json(filename, data, filelock):
+    with filelock:
+        with open(filename, "w") as f:
+            f.write(json.dumps(data, indent=4))
 
 with app.app_context():
     errors = {
@@ -88,9 +98,12 @@ def greeting():
 
 # COTD ###############################################
 
-COTD_DIR = f"{API_FOLDER}/cotd"
+COTD_DIR = f"{API_FOLDER}/api/cotd"
 COTD_FILE = f"{COTD_DIR}/cotd.json"
+COTD_FILE_LOCK = f"{COTD_FILE}.lock"
 COTD_MEDIA = f"{COTD_DIR}/media"
+
+cotd_file_lock = FileLock(COTD_FILE_LOCK)
 
 def date_malformed(date):
     date_parts = date.split("-")
@@ -129,8 +142,7 @@ def cotd_upload():
         if not key_exists(js, key):
             return errors["COTD_MALFORMED_JSON"]
 
-    with open(COTD_FILE, "r") as f:
-        cotd_data = json.loads(f.read())
+    cotd_data = read_json(COTD_FILE, cotd_file_lock)
 
     date, is_today = get_date_if_none(js)
     if not date:
@@ -157,8 +169,7 @@ def cotd_upload():
         "media": f"/static/cotd/{file.filename}"
     }
 
-    with open(COTD_FILE, "w") as f:
-        f.write(json.dumps(cotd_data, indent=4))
+    write_json(COTD_FILE, cotd_data, cotd_file_lock)
 
     if submission_existed:
         res = {"message": "updated creature of the day successfully :)"}
@@ -176,8 +187,7 @@ def cotd_edit_fields():
     if not date:
         return errors["COTD_MALFORMED_JSON"]
     
-    with open(COTD_FILE, "r") as f:
-        cotd_data = json.loads(f.read())
+    cotd_data = read_json(COTD_FILE, cotd_file_lock)
 
     if date in cotd_data.keys():
         pass
@@ -196,8 +206,7 @@ def cotd_edit_fields():
     if len(edited_fileds) == 0:
         return jsonify({"error": "no fields were specified :("}), 401
 
-    with open(COTD_FILE, "w") as f:
-        f.write(json.dumps(cotd_data, indent=4))
+    write_json(COTD_FILE, cotd_data, cotd_file_lock)
     
     return jsonify({"message": f"updated fields: {", ".join([f"'{x}'" for x in edited_fileds])} :)"})
 
@@ -210,8 +219,7 @@ def cotd_delete():
     if not date:
         return errors["COTD_MALFORMED_JSON"]
     
-    with open(COTD_FILE, "r") as f:
-        cotd_data = json.loads(f.read())
+    cotd_data = read_json(COTD_FILE, cotd_file_lock)
 
     if date in cotd_data.keys():
         pass
@@ -222,8 +230,7 @@ def cotd_delete():
     
     cotd_data.pop(date)
 
-    with open(COTD_FILE, "w") as f:
-        f.write(json.dumps(cotd_data, indent=4))
+    write_json(COTD_FILE, cotd_data, cotd_file_lock)
 
     return jsonify({"message": f"successfully deleted entry '{date}' :)"}), 200
 
@@ -231,8 +238,7 @@ def cotd_delete():
 def cotd_get():
     js = request.get_json()
 
-    with open(COTD_FILE, "r") as f:
-        cotd_data = json.loads(f.read())
+    cotd_data = read_json(COTD_FILE, cotd_file_lock)
 
     if key_exists(js, "date"):
         date = js["date"]
@@ -251,8 +257,7 @@ def cotd_get():
 @app.route('/api/cotd/get_today', methods=["GET"])
 def cotd_get_today():
     date = str(datetime.now().date())
-    with open(COTD_FILE, "r") as f:
-        cotd_data = json.loads(f.read())
+    cotd_data = read_json(COTD_FILE, cotd_file_lock)
     if date in cotd_data.keys():
         todays_cotd_data = cotd_data[date]
     else:
