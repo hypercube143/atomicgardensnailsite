@@ -128,7 +128,7 @@ def greeting():
 
 # COTD ###############################################
 
-COTD_DIR = f"{API_FOLDER}/api/cotd"
+COTD_DIR = f"{API_FOLDER}/cotd"
 COTD_FILE = f"{COTD_DIR}/cotd.json"
 COTD_FILE_LOCK = f"{COTD_FILE}.lock"
 COTD_MEDIA = f"{COTD_DIR}/media"
