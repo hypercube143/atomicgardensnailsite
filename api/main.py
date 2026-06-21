@@ -294,10 +294,9 @@ def cotd_get_today():
         return jsonify({"error": "no creature of the day yet :("}), 403
     return jsonify(todays_cotd_data), 200
 
-@app.route('/api/cotd/page/<int:page_n>', methods=["GET"])
-def cotd_get_page(page_n):
-    cotd_data = read_json(COTD_FILE, cotd_file_lock)
-    cotd_list_data = [
+def cotd_list_data(cotd_data):
+    # convert k,v to v
+    return [
         {
             "date": k,
             "title": v["title"],
@@ -306,9 +305,18 @@ def cotd_get_page(page_n):
             "media": v["media"]
         } for k, v in cotd_data.items() 
     ]
-    p_data = page_data(cotd_list_data, page_n=page_n)
+
+@app.route('/api/cotd/page/<int:page_n>', methods=["GET"])
+def cotd_get_page(page_n):
+    cotd_data = read_json(COTD_FILE, cotd_file_lock)
+    p_data = page_data(cotd_list_data(cotd_data), page_n=page_n)
     return jsonify(p_data), 200
 
+@app.route('/api/cotd/last_page', methods=["GET"])
+def cotd_get_last_page():
+    cotd_data = read_json(COTD_FILE, cotd_file_lock)
+    p_data = page_data(cotd_list_data(cotd_data), last_page=True)
+    return jsonify(p_data), 200
 
 
 ######################################################
